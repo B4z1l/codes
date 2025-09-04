@@ -1,0 +1,17 @@
+Prima di compilare controllare l'esistenza delle cartelle input, log, plotting e almeno la sottocartella plotting/data per stampare su file i dati.
+
+1- Nella cartella input sono contenute le informazioni necessarie per l'automazione del programma secondo le nostre scelte gestite per colonne.
+
+2- La cartella log contiene il file out.log in cui sono stampati i dati relativi all'integrazione che si è eseguita l'ultima volta.
+
+3- La cartella plotting contiene gli script gnuplot per fare i grafici necessari e due sottocartelle (data, Immagini) che servono ai compiti 
+di cui il nome, in data vengono prodotti tutti i file di output con i dati, in Immagini vengono prodotti i grafici tramite gli script gnuplot.
+
+ 
+
+Il codice può essere modificato facilmente scegliendo tra immissione manuale e da file dei dati andando a riga 47 del codice. 
+Ulteriori modifiche si potranno effettuare sulle funzione modificando i dati.
+Nel file di input e anche a mano è richiesto cosa si vuole fare per primo e si può scegliere immettendo il codice proprio della parte.
+
+!! Attenzione, per il calcolo dei bacini di attrazione sono necessari su macchina windows circa 45 min - 1h !!
+

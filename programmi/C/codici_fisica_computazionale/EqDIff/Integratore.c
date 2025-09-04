@@ -1,21 +1,25 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include <time.h>
 #include "def.h"
 
 
+
 ps iposvel(double x0, double v0, double t0);
-ps eulero(double dt, double w2, double beta, ps posvel, double f0, double wf, int sistema, double alf);
-ps eulero_cromer(double dt, double w2, double beta, ps posvel, double f0, double wf, int sistema, double alf);
-ps verlet_autosufficiente(double dt, double w2, double beta, ps posvel, double f0, double wf,  int sistema, double alf);
-ps rounge_kutta2(double dt, double w2, double beta, ps posvelo, double f0, double wf, int sistema, double alf);
-ps rounge_kutta4(double dt, double w2, double beta, ps posvelo, double f0, double wf,  int sistema, double alf);
+ps eulero(double dt, double w2, double beta, ps posvel, double f0, double wf, int sistema);
+ps eulero_cromer(double dt, double w2, double beta, ps posvel, double f0, double wf, int sistema);
+ps verlet_autosufficiente(double dt, double w2, double beta, ps posvel, double f0, double wf,  int sistema);
+ps rounge_kutta2(double dt, double w2, double beta, ps posvelo, double f0, double wf, int sistema);
+ps rounge_kutta4(double dt, double w2, double beta, ps posvelo, double f0, double wf,  int sistema);
 
 
 double energia(double w2, ps posvel, int sistema, double l);
 double enersimp(double x, double v, double w2);
-double oscillatoreforzato(double w2, double x, double beta, double v, double f0, double wf, double dt, int sistema, double alf);
+double oscillatoreforzato(double w2, double x, double beta, double v, double f0, double wf, double dt, int sistema);
 double potenziale(double w2, double x, int sistema, double l);
 int scelta(int algoritmo, int at, FILE *o);
-void algoritmi(int algoritmo, double dt, double w2, double beta, long int N, ps posvel, double E0, FILE *fp, double f0, double wf, int sistema, int c, double l, double alf);
+void algoritmi(int algoritmo, double dt, double w2, double beta, long int N, ps posvel, double E0, FILE *fp, double f0, double wf, int sistema, int c, double l);
 void poincare();
 void attrazione();
 void keplero();
@@ -24,24 +28,20 @@ int letint(char *print);
 double letdoub(char *print);
 void errori();
 void traiettorie(double dt0);
-
 /*inizia qui l'algoritmo*/
 
 int main(void) {
 
-
-    double x0, v0, dt, w2, T, E0, l, beta, t, f0, wf, alf;
+    double x0, v0, dt, w2, T, E0, l, beta, t, f0, wf;
     long int N;
     int algoritmo, sistema, forz, c, at;
     ps posvel;
  
- FILE *o = fopen("output/log/output.log", "w");
+ FILE *o = fopen("log/output.log", "w");
  if(o == NULL){
-    printf("Attenzione output.log non pervenuto");
-    exit(EXIT_FAILURE);
+    fprintf(stderr, "Attenzione output.dat non pervenuto");
   }
 
-  
   inizio:    
      /*commentare riga 47 se si vuole solo automatico e decommentare riga 48, altrimenti il contrario*/
     //at = letint("Inserisci 0 per prendere i dati da file, 1 per inserire manualmente i dati."); 
@@ -74,13 +74,13 @@ int main(void) {
  
 
   if(at == 0) {
-  FILE *z = fopen("output/input/input.txt", "r");
+  FILE *z = fopen("input/input.txt", "r");
 
    if(z == NULL){
     fprintf(stderr, "Attenzione input non presente si crei il file input.dat inserire i dati come indicato nella relazione\n");
     exit(EXIT_FAILURE);
    } else {
-    fscanf(z, "%d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &sistema, &algoritmo, &beta, &f0, &wf, &x0, &v0, &t, &dt, &l, &w2, &alf);
+    fscanf(z, "%d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf", &sistema, &algoritmo, &beta, &f0, &wf, &x0, &v0, &t, &dt, &l, &w2);
     fclose(z);
    }
   }
@@ -124,19 +124,20 @@ if ((sistema == 1 && at == 0) || (sistema == 2 && at == 0) || sistema == 3 || si
 salto:
 
 
-  printf("\n Iniziamo i calcoli...\n");
- 
+    printf("\n Iniziamo i calcoli...\n");
+
    clock_t q; /*inizio del contatore del tempo*/
   q = clock();
 
-  //000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+ //000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
                               /*codice di integrazione dell'oscillatore*/
 
+  if (sistema == 1 ) {///////////////////////////////////////////////////////
 
-  if (sistema == 1 ) {        ///////////////////////////////////////////////////////
 
-     fprintf(o, "Hai scelto di integrare un oscillatore\n");
+      fprintf(o, "Hai scelto di integrare un oscillatore\n");
 
       initosc: 
 
@@ -155,11 +156,9 @@ salto:
          }
 
         /*qui è per valutare la conservazione dell'energia con i vari metodi a diversi dt*/
-        FILE *fp = fopen("/home/bazil/Documents/codes/Programmi/C/codici_fisica_computazionale/Integratore/output/plotting/data/dati.dat", "w");
-        if(fp == NULL){
-        printf("Errore: impossibile aprire plotting/data/dati.dat\n");
-         exit(EXIT_FAILURE);
-        }
+        FILE *fp = fopen("plotting/data/dati.dat", "w");
+        
+
       if(at == 0){
         goto go1;
       }
@@ -183,16 +182,16 @@ salto:
                goto tempo1; 
             }
 
-      fprintf(o,"dt = %lf, t = %lf\n", dt, t);
-      fprintf(o,"w2 = %lf, x0 = %lf, v0 = %lf\n",w2, x0, v0);
+      fprintf(o,"dt = %g, t = %g\n", dt, t);
+      fprintf(o,"w2 = %g, x0 = %g, v0 = %g\n",w2, x0, v0);
       fprintf(o,"Numero di passi da integrare N = %li \n", N); 
                /*inizializzo le variabili*/
       l = 1;
       posvel = iposvel(x0, v0, 0);  
       E0 = energia(w2, posvel, sistema, l);
-      fprintf(o,"A t = 0 l'energia vale %lf \n", E0);
+      fprintf(o,"A t = 0 l'energia vale %g \n", E0);
                /*facciamo i calcoli ora*/
-      algoritmi(algoritmo, dt, w2, beta, N, posvel, E0, fp, f0, wf, sistema, c, l, alf);
+      algoritmi(algoritmo, dt, w2, beta, N, posvel, E0, fp, f0, wf, sistema, c, l);
       
 
   } else if (sistema == 2) {     //////////////////////////////////////////////////////////////
@@ -251,13 +250,13 @@ if(at == 0){
 
    /*inizializzo le variabili*/
     posvel = iposvel(x0, v0, 0);  
-      fprintf(o,"theta(0) = %lf, omega(0) = %lf\n", posvel.x, posvel.v);
+      fprintf(o,"theta(0) = %g, omega(0) = %g\n", posvel.x, posvel.v);
     E0 = energia(w2, posvel, sistema, l);
-      fprintf(o,"A t = 0 l'energia vale %lf \n", E0);
+      fprintf(o,"A t = 0 l'energia vale %g \n", E0);
       /*inizio algoritmi di calcolo per il pendolo*/
        FILE *fp = fopen("plotting/data/dati.dat", "w");
-      algoritmi(algoritmo, dt, w2, beta, N, posvel, E0, fp, f0, wf, sistema, c, l, alf);
-      printf("qua");
+      algoritmi(algoritmo, dt, w2, beta, N, posvel, E0, fp, f0, wf, sistema, c, l);
+
 ///////////////////////////////////////////////////////////////////////////////////////////
   } else if (sistema == 3) {
     fprintf(o,"hai scelto l'analisi degli errori\n");
@@ -275,15 +274,19 @@ if(at == 0){
      fprintf(o,"hai scelto le biforcazioni\n");
    biforcazione();
 
-  } else if (sistema == 7) {
+  }else if (sistema == 7) {
     fprintf(o,"hai deciso di integrare il problema di Keplero\n");
    keplero();
 
-  } else if (sistema == 8) {
+  }else if (sistema == 8) {
     fprintf(o, "hai deciso di calcolare le traiettorie a diverso forzante");
     dt = 0.001;
     traiettorie(dt);
-  } else if (sistema == 0) {
+  }
+  
+  
+  
+   else if (sistema == 0) {
    fprintf(o,"Arrivederci allora...\n");
       exit(EXIT_SUCCESS);
 
@@ -291,19 +294,23 @@ if(at == 0){
   printf("Scegli bene cosa vuoi fare!\n");
   fflush(stdin);
 
-     goto inizio; /*torno all'inizio delle scelte*/
+ goto inizio; /*torno all'inizio delle scelte*/
   } 
-
-
 fprintf(o,"Fatto!");
+
 q = clock() - q;
   double time_taken = ((double)q)/CLOCKS_PER_SEC; 
 
 fprintf(o,"\n the program took %lf seconds to finish", time_taken);
+
 fclose(o);
+
 return 0;
 
+
 }
+
+
 
 
 

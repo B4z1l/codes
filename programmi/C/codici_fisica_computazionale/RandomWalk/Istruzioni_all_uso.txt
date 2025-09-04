@@ -1,0 +1,2 @@
+Per far funzionare il codice è necessaria la presenza della cartella di input o almeno del file(ma bisogna modificare solo il richiamo al file nel codice).
+Nelle relative sottocartelle di plotting ci sono i dati scritti e le immagini generate tramite lo script random.gp

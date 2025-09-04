@@ -1,0 +1,28 @@
+\documentclass{article}
+
+
+\usepackage{lipsum}
+\usepackage{graphicx}
+
+\begin{document}
+	
+\fbox
+{
+	\begin{minipage}{0.75\textwidth}
+		\lipsum[1] % dummy text
+	\end{minipage}
+}	
+
+
+\vspace{2cm}
+	
+	
+	\rotatebox{-45}
+	{
+		\begin{minipage}{0.75\textwidth}
+			\lipsum[1] \footnote{This is just dummy text.}
+		\end{minipage}
+	}
+	
+	
+\end{document}

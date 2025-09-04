@@ -1,0 +1,6 @@
+*.dat
+.ipynb_checkpoints
+.venv
+.jupyter
+*.jpeg
+*.png

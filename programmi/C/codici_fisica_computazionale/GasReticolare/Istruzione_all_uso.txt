@@ -1,0 +1,1 @@
+I codici producono i grafici direttamente  utilizzando le pipe per comunicare con il sistema operativo. le cartelle necessarie sono solo input_gas e img dove vengono prodotte le immagini.

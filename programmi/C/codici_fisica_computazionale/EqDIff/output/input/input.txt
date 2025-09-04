@@ -1,0 +1,31 @@
+ 4       3       0.0      0.   0.0   1.  1.   100. 0.01 9.81   1.
+
+sistema algoritmo  beta   f0   wf   x0    v0    t    dt   l    w2
+
+istruzioni:
+
+  sistema:
+  sistema = 1 oscillatore classico
+  sistema = 2 pendolo (classico se beta = 0, f0 = 0)
+  sistema = 3 analisi errori 
+  sistema = 4 sezioni di poincare' e fasi
+  sistema = 5 bacini di attrazione
+  sistema = 6 biforcazioni
+  sistema = 7 problema di keplero con 2 pianeti
+  sistema = 8 integrazione traiettorie a diverso f0
+  sistema = 0 exit 
+
+  algoritmo:
+  algoritmo = 0 Eulero
+  algoritmo = 1 Eulero-Cromer
+  algoritmo = 2 Verlet Velocity
+  algoritmo = 3 Rounge-Kutta (per input da file e' default RK di ordine 4)
+ 
+
+  legenda:
+
+ l: lunghezza del pendolo
+ beta: coefficiente di attrito
+ f0: forzante
+ wf: frequenza del forzante
+ w2: frequenza quadra dell'oscillatore (per il pendolo viene calcolata tramite la lunghezza e g(definito negli headers) )
