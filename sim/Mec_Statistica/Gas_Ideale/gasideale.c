@@ -5,18 +5,18 @@
 
 
 // definisco il limite quadrato di coordinate che pe laricelle possono raggiungere
-#define edge 10
-#define eps 0.1
-// definisco il numero di particelle per chiarezza 
-#define N 2
+#define edge 50.
+#define eps 0.01
+// definisco il numero di particelle
+#define N 30
 
 
 //Lo scopo di questo codice è di integrare un insieme di particelle che si ignorano a vicenda (gas ideale)  e che sbattono su un muro. 
 //lo spazio disponibile è un quadrato bidimensionale di lunghezza "edge"
 
 
-//prima di fare tutto mi serve salvare le coordinate e le velocità delle particelle, uso un'array di struct per risolvere
-//
+//prima di fare tutto mi serve salvare le coordinate e le velocità delle particelle, uso un'array di struct di array per risolvere
+
 
 
 struct var{
@@ -25,9 +25,10 @@ struct var{
 };
 
 
+//funzione accelerazione
 
 double acc(double x){
-	double a = -x*x;
+	double a = -x*x*x;
 	return a;
 }
 
@@ -50,11 +51,12 @@ struct var eulero(struct var old, double dt){
 
 	for(int i = 0; i < N; i++){
 		if(old.pos[i]>edge){
-			old.pos[i] = edge;
+
+			old.pos[i] = edge - old.vel[i]*dt*0.01;
 
 		}else if(old.pos[i]<-edge){
 
-			old.pos[i] = -edge;
+			old.pos[i] = -edge + old.vel[i]*0.01;
 		}
 	}
 
@@ -67,8 +69,8 @@ struct var eulero(struct var old, double dt){
 	}
 
 
-   new.vel[0] = old.vel[0]; //per ora non ci sono accelerazioni (gas perfetto in spazio come ti pare)
-   new.vel[1] = old.vel[1];
+   new.vel[0] = old.vel[0] + acc(old.pos[0])*dt;
+   new.vel[1] = old.vel[1] + acc(old.pos[1])*dt;
    
    new.pos[0] = old.pos[0] + new.vel[0]*dt + 0.5*acc(old.pos[0])*dt*dt;
    new.pos[1] = old.pos[1] + new.vel[1]*dt + 0.5*acc(old.pos[1])*dt*dt;
@@ -85,10 +87,10 @@ struct var inizializzazione(struct var old){
 	 
 	 //per inizializzare il tutto uso valori randomici per le posizioni (nel range definito obv) e imposto le velocità uniformi er semplicità 
          
-	old.pos[0] = 10. * casuale();
-        old.pos[1] = 10. * casuale();
-	old.vel[0] = 5. * casuale();
-	old.vel[1] = 5. * casuale();
+	old.pos[0] =  edge * casuale();
+        old.pos[1] =  edge * casuale();
+	old.vel[0] = 10. * casuale();
+	old.vel[1] = 10. * casuale();
 
  return old;	
  }
@@ -102,16 +104,20 @@ int main(void){
 //la prima cosa che si vuole fare è sicuramente inizializzare un array di struct creato per poi aggiornarlo e stampare i dati raccolti
 struct var syst[N];
 
+
+
 for(int i = 0; i < N; i++){
 syst[i] = inizializzazione(syst[i]);
 printf("%lf %lf %lf %lf\n", syst[i].pos[0], syst[i].pos[1], syst[i].vel[0], syst[i].vel[1]); 
 }
 
-double t, dt = 0.01, tmax = 400.; 
+double t, dt = 0.001, tmax = 10.;
 //apro un file per la scrittura della posizione di almeno una particella;
  
-FILE* ps = fopen("out.txt", "w");
+FILE* ps = fopen("out.dat", "w");
 
+
+fprintf(ps, "%c %c %c\n", 't', 'x', 'y');
 
 //LOG 20/08/2025 corretto tutto, si compila e funziona, si possono aggiungere un numero qualsiasi di particelle ma va  cambiata l'inizializzazione delle particelle con random posizioni e velocità (in modo da avere una energia interna prestabilita però) e tale da stampare su file diversi i valori delle particelle.
 //LOG 28/08/2025 aggiunta la possibilità di stamapare due particelle con accelerazione, ho corretto il controllo delle pareti dopo che ho vistoche le particelle la superavano lo stesso
