@@ -1,76 +1,84 @@
 
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import numpy as np
+from matplotlib.animation import FuncAnimation, FFMpegWriter
+from mpl_toolkits.mplot3d import Axes3D
 
-# === Lettura dati ===
-df = pd.read_csv("out.dat", sep=r"\s+", header=None, names=["t", "x", "y"], low_memory = False)
-df = df.apply(pd.to_numeric, errors="coerce").dropna()
+# === PARAMETRI ===
+filename = "out.dat"
+n_particles = 10000
+dt = 0.01
+fps = 60
+speed = 1.0
+show_trail = False
+trail_length = 100
+point_size = 2
+save_video = True
+output_file = "animazione_1080p_zoom.mp4"
+bitrate = 15000
+dpi = 300
 
-# Numero di particelle
-n_particles = 30
+# Parametri telecamera
+elev = 30              # elevazione in gradi
+azim = -45          # azimut in gradi
+zoom_factor = 1.0     # 1.0 = nessuno zoom, <1 = zoom in
 
-# Ricostruisco in matrici (n_steps, n_particles)
-n_steps = len(df) // n_particles
-t = df["t"].values.reshape(n_steps, n_particles)[:, 0]
-x = df["x"].values.reshape(n_steps, n_particles)
-y = df["y"].values.reshape(n_steps, n_particles)
+# === CARICAMENTO DATI ===
+df = pd.read_csv(filename, sep=r"\s+", engine="python")
+t = df["t"].values.reshape(-1, n_particles)
+x = df["x"].values.reshape(-1, n_particles)
+y = df["y"].values.reshape(-1, n_particles)
+z = df["z"].values.reshape(-1, n_particles)
+n_frames = t.shape[0]
 
-# === Setup figura ===
-fig, ax = plt.subplots()
-ax.set_xlim(x.min() - 1, x.max() + 1)
-ax.set_ylim(y.min() - 1, y.max() + 1)
-ax.set_xlabel("X")
-ax.set_ylabel("Y")
-ax.set_title("Animazione particelle (scalata nel tempo)")
+# === FIGURA ===
+fig = plt.figure(figsize=(6.4, 3.6), dpi=dpi)  # 1920x1080
+ax = fig.add_subplot(111, projection="3d")
 
-# Testo del tempo
-time_text = ax.text(0.02, 0.95, '', transform=ax.transAxes)
+# calcolo limiti centrati e zoomati
+x_center, y_center, z_center = x.mean(), y.mean(), z.mean()
+x_range, y_range, z_range = (x.max()-x.min())*zoom_factor/2, (y.max()-y.min())*zoom_factor/2, (z.max()-z.min())*zoom_factor/2
 
-# Colori e artisti
-colors = plt.cm.tab10(np.linspace(0, 1, n_particles))
-points = [ax.plot([], [], 'o', color=colors[i], markersize=6)[0] for i in range(n_particles)]
-trails = [ax.plot([], [], '-', color=colors[i], linewidth=1, alpha=0.7)[0] for i in range(n_particles)]
+ax.set_xlim(x_center - x_range, x_center + x_range)
+ax.set_ylim(y_center - y_range, y_center + y_range)
+ax.set_zlim(z_center - z_range, z_center + z_range)
 
-# === Controlli temporali ===
-dt = 0.001          # tuo passo simulazione (s) -> metti quello reale
-target_fps = 60    # fps del video/animazione
-real_time_factor = 1.0  # 1 s reale mostra 5 s di simulazione (aumenta per accelerare)
+ax.set_xlabel("X [m]")
+ax.set_ylabel("Y [m]")
+ax.set_zlabel("Z [m]")
+ax.view_init(elev=elev, azim=azim)
 
-# ogni frame deve coprire questa quantità di tempo di simulazione:
-sim_time_per_frame = real_time_factor / target_fps
-# quanti passi di simulazione saltare tra frame mostrati:
-step = max(1, int(round(sim_time_per_frame / dt)))
-# intervallo reale tra frame (ms)
-interval = 1000 / target_fps
+time_text = ax.text2D(0.05, 0.95, "", transform=ax.transAxes)
 
-# indici dei frame che mostreremo
-frames_idx = list(range(0, n_steps, step))
+# scatter per i punti
+scat = ax.scatter([], [], [], s=point_size)
 
-# Lunghezza scia in secondi (invece che in passi, così resta coerente con la fisica)
-trail_seconds = 0.5                      # scia di 0.5 s di simulazione
-trail_len_steps = max(1, int(round(trail_seconds / dt)))
+# scie (se abilitate)
+if show_trail:
+    trails = [ax.plot([], [], [], "-", alpha=0.3, linewidth=0.5)[0] for _ in range(n_particles)]
+else:
+    trails = []
 
-def init():
-    for p, tr in zip(points, trails):
-        p.set_data([], [])
-        tr.set_data([], [])
-    time_text.set_text('')
-    return points + trails + [time_text]
+# === UPDATE FRAME ===
+def update(frame):
+    scat._offsets3d = (x[frame], y[frame], z[frame])
+    if show_trail:
+        for i, tr in enumerate(trails):
+            start = max(0, frame - trail_length)
+            tr.set_data(x[start:frame, i], y[start:frame, i])
+            tr.set_3d_properties(z[start:frame, i])
+    time_text.set_text(f"t = {t[frame,0]:.3f} s")
+    return [scat] + trails + [time_text]
 
-def update(frame_idx):
-    start = max(0, frame_idx - trail_len_steps)
-    for i, (p, tr) in enumerate(zip(points, trails)):
-        # punto attuale (liste di lunghezza 1!)
-        p.set_data([x[frame_idx, i]], [y[frame_idx, i]])
-        # scia (ultimi trail_len_steps passi reali, non solo frame mostrati)
-        tr.set_data(x[start:frame_idx+1, i], y[start:frame_idx+1, i])
-    time_text.set_text(f"t = {t[frame_idx]:.3f} s")
-    return points + trails + [time_text]
+# === ANIMAZIONE ===
+interval = 1000 * dt / speed
+ani = FuncAnimation(fig, update, frames=n_frames, interval=interval, blit=False)
 
-ani = animation.FuncAnimation(
-    fig, update, frames=frames_idx, init_func=init, blit=True, interval=interval
-)
-
-plt.show()
+# === SALVATAGGIO O DISPLAY ===
+if save_video:
+    writer = FFMpegWriter(fps=fps, metadata=dict(artist="me"), bitrate=bitrate)
+    ani.save(output_file, writer=writer, dpi=dpi)
+    print(f"Animazione salvata in {output_file} con qualità 1080p e zoom={zoom_factor}")
+else:
+    plt.show()
