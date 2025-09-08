@@ -1,13 +1,15 @@
 import pandas as pd
 import plotly.graph_objects as go
 
-# === PARAMETRI ===
-filename = "out.dat"
-n_particles = 10000  # puoi ridurre se il browser diventa lento
-point_size = 2       # dimensione punti
-dt = 0.01            # passo di simulazione
 
-# === CARICAMENTO DATI ===
+filename = "out.dat"
+n_particles = 10000
+point_size = 2
+dt = 0.001
+
+
+
+#--------------INPUT
 df = pd.read_csv(filename, sep=r"\s+", engine="python")
 x = df["x"].values.reshape(-1, n_particles)
 y = df["y"].values.reshape(-1, n_particles)
@@ -15,7 +17,10 @@ z = df["z"].values.reshape(-1, n_particles)
 t = df["t"].values.reshape(-1, n_particles)
 n_frames = x.shape[0]
 
-# === CREAZIONE FRAME ANIMATI ===
+
+
+
+#-------------qua sono creati i frame ad ogni passo temporale
 frames = [
     go.Frame(
         data=[go.Scatter3d(
@@ -30,7 +35,7 @@ frames = [
     for k in range(n_frames)
 ]
 
-# === FIGURA PRINCIPALE ===
+#-----------------------genero la figura
 fig = go.Figure(
     data=[go.Scatter3d(
         x=x[0],
@@ -42,7 +47,7 @@ fig = go.Figure(
     frames=frames
 )
 
-# === LAYOUT INTERATTIVO ===
+#-------------------------genero il layout dell'html
 fig.update_layout(
     width=1080,
     height=720,
@@ -72,5 +77,5 @@ fig.update_layout(
     )]
 )
 
-# === MOSTRA FIGURA INTERATTIVA ===
+
 fig.show()

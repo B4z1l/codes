@@ -7,17 +7,19 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # === PARAMETRI ===
 filename = "out.dat"
-n_particles = 10000
-dt = 0.01
+n_particles = 1000
+dt = 0.001
 fps = 60
 speed = 1.0
 show_trail = False
 trail_length = 100
 point_size = 2
-save_video = True
+save_video = False
 output_file = "animazione_1080p_zoom.mp4"
 bitrate = 15000
 dpi = 300
+
+
 
 # Parametri telecamera
 elev = 30              # elevazione in gradi
@@ -26,6 +28,7 @@ zoom_factor = 1.0     # 1.0 = nessuno zoom, <1 = zoom in
 
 # === CARICAMENTO DATI ===
 df = pd.read_csv(filename, sep=r"\s+", engine="python")
+
 t = df["t"].values.reshape(-1, n_particles)
 x = df["x"].values.reshape(-1, n_particles)
 y = df["y"].values.reshape(-1, n_particles)

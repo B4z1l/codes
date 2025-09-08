@@ -10,7 +10,7 @@
 #define edge 10.
 #define eps 0.01 // questo serve per i controlli al bordo
 // definisco il numero di particelle e la dimensione della simulazione
-#define N 10000  //lo stack è piccolo quindi non eccedere le 20000
+#define N 1000  //lo stack è piccolo quindi non eccedere le 20000
 #define dim 3
 #define k 1000.0
 //Lo scopo di questo codice è di integrare un insieme di particelle che si ignorano a vicenda (gas ideale)  e che sbattono su un muro. 
@@ -80,8 +80,13 @@ double k4_v[N][dim], k4_x[N][dim];
 
 double total_acc(double pos, double vel, int i, double t) {
 	double a = acc(pos, vel, t, i); // tua funzione di accelerazione
-	if(pos > edge) a += -k*(pos - edge);
-	else if(pos < -edge) a += -k*(pos + edge);
+
+	if(pos > edge){
+		a += -k*(pos - edge);
+	}else if(pos < -edge){
+		a += -k*(pos + edge);
+	}
+
 	return a;
 }
 
@@ -100,27 +105,24 @@ void integ(struct var old[N], struct var new[N], double dt, double t) {
 	#pragma omp parallel for
 	for(int p = 0; p < N; p++){
 		for(int i = 0; i < dim; i++){
-			k2_v[p][i] = total_acc(old[p].pos[i] + 0.5*k1_x[p][i],
-								   old[p].vel[i] + 0.5*k1_v[p][i], i, t + 0.5*dt) * dt;
-								   k2_x[p][i] = (old[p].vel[i] + 0.5*k1_v[p][i]) * dt;
+			k2_v[p][i] = total_acc(old[p].pos[i] + 0.5*k1_x[p][i], old[p].vel[i] + 0.5*k1_v[p][i], i, t + 0.5*dt) * dt;
+			k2_x[p][i] = (old[p].vel[i] + 0.5*k1_v[p][i]) * dt;
 		}
 	}
 
 	#pragma omp parallel for
 	for(int p = 0; p < N; p++){
 		for(int i = 0; i < dim; i++){
-			k3_v[p][i] = total_acc(old[p].pos[i] + 0.5*k2_x[p][i],
-								   old[p].vel[i] + 0.5*k2_v[p][i], i, t + 0.5*dt) * dt;
-								   k3_x[p][i] = (old[p].vel[i] + 0.5*k2_v[p][i]) * dt;
+			k3_v[p][i] = total_acc(old[p].pos[i] + 0.5*k2_x[p][i], old[p].vel[i] + 0.5*k2_v[p][i], i, t + 0.5*dt) * dt;
+			k3_x[p][i] = (old[p].vel[i] + 0.5*k2_v[p][i]) * dt;
 		}
 	}
 
 	#pragma omp parallel for
 	for(int p = 0; p < N; p++){
 		for(int i = 0; i < dim; i++){
-			k4_v[p][i] = total_acc(old[p].pos[i] + k3_x[p][i],
-								   old[p].vel[i] + k3_v[p][i], i, t + dt) * dt;
-								   k4_x[p][i] = (old[p].vel[i] + k3_v[p][i]) * dt;
+			k4_v[p][i] = total_acc(old[p].pos[i] + k3_x[p][i], old[p].vel[i] + k3_v[p][i], i, t + dt) * dt;
+		    k4_x[p][i] = (old[p].vel[i] + k3_v[p][i]) * dt;
 		}
 	}
 
@@ -137,14 +139,10 @@ void integ(struct var old[N], struct var new[N], double dt, double t) {
 
 
 
-
-
-
-
-
 struct var inizializzazione(struct var old){        //inizializzazione posizioni e velocita
 	 bool flag1 = false;
      bool flag2 = true;
+	 #pragma omp parallel for
 	for(int i = 0; i < dim; i++){
 
 	    old.pos[i] =  edge * casuale() * nepos(flag1);
@@ -191,7 +189,8 @@ return;
 int main() {
 	struct var new_syst[N];  // unico array per lo stato corrente delle particelle
 
-	double t = 0.0, dt=0.01, tmax = 10.0;
+	double t = 0.0, dt=0.001, tmax = 10.0;
+	
 
 	FILE* ps = fopen("out.dat", "w");
 	FILE* de = fopen("dens.dat", "w");
@@ -235,7 +234,7 @@ int main() {
 	fclose(ps);
 	fclose(de);
 
-	system("python3 ani3d.py");
+	//system("python3 ani3d.py");
 
 	return 0;
 }
@@ -247,5 +246,5 @@ int main() {
 //LOG 28/08/2025 aggiunta la possibilità di stamapare due particelle con accelerazione, ho corretto il controllo delle pareti dopo che ho vistoche le particelle la superavano lo stesso
 //LOG 04/09/2025 Agginta la terza dimensione e reso più generale la generazione di punti e velocità assieme ai calcoli per dimensioni più alte.
 //LOG 06/09/2025 Aggiunto il calcolo della densità per un volume pari ad un mezzo del totale (x>0)
-//LOG 07/09/2025 Ottimizzato con CgatGPT l'integrazione implementando il multithread, inoltre è stato implementato un potenziale elastico alla parete per il rimbalzo e rk4 per l'integrazione.
+//LOG 07/09/2025 Ottimizzato con ChatGPT l'integrazione implementando il multithread, inoltre è stato implementato un potenziale elastico alla parete per il rimbalzo e rk4 per l'integrazione.
 
