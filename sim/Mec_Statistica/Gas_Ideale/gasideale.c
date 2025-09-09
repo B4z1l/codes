@@ -246,5 +246,5 @@ int main() {
 //LOG 28/08/2025 aggiunta la possibilità di stamapare due particelle con accelerazione, ho corretto il controllo delle pareti dopo che ho vistoche le particelle la superavano lo stesso
 //LOG 04/09/2025 Agginta la terza dimensione e reso più generale la generazione di punti e velocità assieme ai calcoli per dimensioni più alte.
 //LOG 06/09/2025 Aggiunto il calcolo della densità per un volume pari ad un mezzo del totale (x>0)
-//LOG 07/09/2025 Ottimizzato con ChatGPT l'integrazione implementando il multithread, inoltre è stato implementato un potenziale elastico alla parete per il rimbalzo e rk4 per l'integrazione.
+//LOG 07/09/2025 Ottimizzato l'integrazione implementando il multithread, inoltre è stato implementato un potenziale elastico alla parete per il rimbalzo e rk4 per l'integrazione.
 
