@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 
 
 filename = "out.dat"
-n_particles = 10000
+n_particles = 1000
 point_size = 2
 dt = 0.001
 

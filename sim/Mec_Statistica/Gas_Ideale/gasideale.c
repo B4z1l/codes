@@ -3,7 +3,7 @@
 #include<math.h>
 #include<time.h>
 #include<stdbool.h>
-
+#include<unistd.h>
 #include <omp.h>
 
 // definisco il limite massimo della scatola
@@ -93,6 +93,7 @@ double total_acc(double pos, double vel, int i, double t) {
 
 
 // integrazione RK4 con OpenMP
+
 void integ(struct var old[N], struct var new[N], double dt, double t) {
 	#pragma omp parallel for
 	for(int p = 0; p < N; p++){
@@ -142,7 +143,7 @@ void integ(struct var old[N], struct var new[N], double dt, double t) {
 struct var inizializzazione(struct var old){        //inizializzazione posizioni e velocita
 	 bool flag1 = false;
      bool flag2 = true;
-	 #pragma omp parallel for
+
 	for(int i = 0; i < dim; i++){
 
 	    old.pos[i] =  edge * casuale() * nepos(flag1);
@@ -234,7 +235,22 @@ int main() {
 	fclose(ps);
 	fclose(de);
 
-	//system("python3 ani3d.py");
+
+
+	system("gnuplot graf.gp"); //faccio il grafico della densità nella directory corrente
+
+
+
+	bool animazione3d = false; //decido se fare l'animazione (meglio false che se no occupa troppa ram se ci sono tante particelle)
+	bool animazione = false; // riemepie un sacco la memoria
+
+	if(animazione3d){
+       system("~/Documents/codes/venv/bin/python3 ani3d.py");
+	}else if(animazione){
+		system("~/Documents/codes/venv/bin/python3  anima.py");
+	}
+
+
 
 	return 0;
 }
